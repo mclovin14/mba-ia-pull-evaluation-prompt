@@ -34,7 +34,6 @@ def pull_prompts_from_langsmith():
             elif msg_type == "HumanMessagePromptTemplate":
                 user_prompt = msg.prompt.template
 
-    # Formata estritamente de acordo com o modelo desejado no bug_to_user_story_v1.yml
     prompt_data = {
         "bug_to_user_story_v1": {
             "description": "Prompt para converter relatos de bugs em User Stories",
