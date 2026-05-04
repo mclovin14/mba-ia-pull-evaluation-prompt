@@ -230,6 +230,10 @@ O projeto é aprovado quando todas as métricas ficam em pelo menos `0.9`:
 
 ## Observações
 
+- O desenvolvimento deste prompt otimizado foi um processo altamente iterativo e desafiador, exigindo **22 versões** (`v22`) para alcançar a estabilidade nas métricas.
+- O maior gargalo de performance esteve sempre concentrado nos issues mais complexos do dataset (como relatórios severos, problemas críticos de checkout e sincronização offline com múltiplos cenários). Nestes casos, o avaliador exigia uma formatação e taxonomia extremamente rigorosas que derrubavam as métricas de *F1-Score* e *Recall* sempre que o modelo tentava usar palavras próprias. A solução foi a injeção determinística de *Skeleton of Thought* estendido e âncoras lexicais estritas.
+- **Por que usamos versões "silenciosas" (silent) das técnicas?**
+  Optamos por aplicar *Chain of Thought*, *Tree of Thought* e *ReAct* de forma silenciosa ("pense passo a passo internamente", "explore internamente", etc.) porque a formatação esperada (ground truth) para a saída não aceitava a exposição do raciocínio lógico do modelo. Se o modelo escrevesse blocos como "Pensamento:..." ou "Avaliando caminhos...", a métrica de *Precision* caía drasticamente. O raciocínio silencioso permitiu usufruir da inteligência avançada dessas técnicas sem poluir o resultado final BDD esperado.
 - O prompt avaliado é sempre puxado do LangSmith Hub, não do arquivo local diretamente
 - Depois de editar `prompts/bug_to_user_story_v2.yml`, é obrigatório executar o push novamente
 - O dataset de avaliação não deve ser alterado
