@@ -22,6 +22,7 @@ Observação:
 - O motivo é operacional: foi necessário contornar limites de taxa do provider sem alterar `src/evaluate.py`, que deve permanecer preservado para fins da avaliação.
 """
 
+# O script agora está dentro de src/, então os imports locais funcionam diretamente
 import os
 import sys
 import json
@@ -29,8 +30,9 @@ import time
 from typing import List, Dict, Any
 from pathlib import Path
 
-# Adiciona a pasta src ao path para poder importar os módulos originais corretamente
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+# Garante que o diretório raiz do projeto está no path para carregar .env corretamente
+project_root = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, project_root)
 
 from dotenv import load_dotenv
 from langsmith import Client
@@ -39,7 +41,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from utils import check_env_vars, format_score, print_section_header, get_llm as get_configured_llm
 from metrics import evaluate_f1_score, evaluate_clarity, evaluate_precision
 
-load_dotenv()
+# Carrega o .env a partir da raiz do projeto
+load_dotenv(os.path.join(project_root, ".env"))
 
 
 def get_llm():
@@ -202,7 +205,7 @@ def evaluate_prompt(
         
         # Em vez de pegar tudo do client do langsmith via .list_examples (que já empacotou tudo)
         # Vamos ler direto do jsonl sequencialmente, linha a linha.
-        jsonl_path = "datasets/bug_to_user_story.jsonl"
+        jsonl_path = os.path.join(project_root, "datasets", "bug_to_user_story.jsonl")
         
         # Primeiro, contamos o total de linhas para o print
         total_examples = 0
@@ -361,7 +364,7 @@ def main():
     client = Client()
     project_name = os.getenv("LANGSMITH_PROJECT", "prompt-optimization-challenge-resolved")
 
-    jsonl_path = "datasets/bug_to_user_story.jsonl"
+    jsonl_path = os.path.join(project_root, "datasets", "bug_to_user_story.jsonl")
 
     if not Path(jsonl_path).exists():
         print(f"❌ Arquivo de dataset não encontrado: {jsonl_path}")
@@ -386,10 +389,12 @@ def main():
 
     # Busca dinamicamente todos os prompts (.yml) na pasta prompts/
     prompts_to_evaluate = []
-    prompts_dir = Path("prompts")
+    prompts_dir = Path(os.path.join(project_root, "prompts"))
     if prompts_dir.exists():
         for prompt_file in sorted(prompts_dir.glob("*.yml")):
-            prompts_to_evaluate.append(f"{username}/{prompt_file.stem}")
+            # Avalia apenas o prompt v2, conforme o src/evaluate.py
+            if prompt_file.stem == "bug_to_user_story_v2":
+                prompts_to_evaluate.append(f"{username}/{prompt_file.stem}")
             
     if not prompts_to_evaluate:
         # Fallback caso a pasta esteja vazia

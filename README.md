@@ -83,22 +83,40 @@ O arquivo `prompts/bug_to_user_story_v2.yml` contém a versão otimizada do prom
 - cobertura factual do bug
 - critérios testáveis e objetivos
 
-## Técnicas Utilizadas no Prompt
+## Técnicas Aplicadas (Fase 2)
 
-As principais estratégias aplicadas em `prompts/bug_to_user_story_v2.yml` são:
+### Técnicas escolhidas
 
-- **Role Prompting**: define uma persona especializada para orientar o tom da resposta e manter foco em valor de negócio, clareza e testabilidade.
-- **Por que foi usada**: para evitar respostas genéricas e fazer o modelo escrever como alguém com visão de produto, arquitetura e qualidade.
-- **Chain of Thought silencioso**: orienta o modelo a organizar o raciocínio internamente antes de responder, ajudando a reduzir omissões importantes sem poluir a saída final.
-- **Por que foi usada**: para melhorar a análise do bug antes da escrita, identificar fatos obrigatórios e preservar detalhes importantes sem perder objetividade na resposta final.
-- **Tree of Thought silencioso**: faz o modelo considerar diferentes perspectivas do problema, como valor para o usuário, critérios testáveis e riscos técnicos, melhorando a cobertura do bug.
-- **Por que foi usada**: para aumentar a cobertura em bugs com mais de um problema e evitar que o modelo foque apenas no primeiro ponto identificado.
-- **Skeleton of Thought**: estrutura internamente a resposta antes da escrita, definindo um esqueleto curto ou expandido conforme a complexidade do bug.
-- **Por que foi usada**: para manter um padrão estável de saída e reduzir respostas incompletas, desorganizadas ou curtas demais em casos complexos.
-- **ReAct silencioso**: reforça um fluxo interno de analisar, decidir, revisar e então responder, ajudando o modelo a escolher a estrutura mais adequada e revisar a cobertura factual antes de responder.
-- **Por que foi usada**: para melhorar a tomada de decisão do modelo sobre formato, prioridade e revisão final do conteúdo.
+As técnicas avançadas escolhidas para refatorar `prompts/bug_to_user_story_v2.yml` foram:
 
-Em conjunto, essas técnicas ajudam o prompt a transformar bugs em histórias de usuário mais claras, completas e alinhadas ao padrão de avaliação do projeto.
+- `Role Prompting`
+- `Chain of Thought` silencioso
+- `Tree of Thought` silencioso
+- `Skeleton of Thought`
+- `ReAct` silencioso
+
+### Justificativa das técnicas
+
+- **Role Prompting**: foi escolhido para fazer o modelo responder com linguagem mais próxima de produto, arquitetura e qualidade, evitando respostas genéricas.
+- **Chain of Thought silencioso**: foi escolhido para melhorar a análise interna do bug antes da escrita, aumentando a chance de preservar detalhes importantes.
+- **Tree of Thought silencioso**: foi escolhido para fazer o modelo avaliar o bug por mais de uma perspectiva, melhorando a cobertura dos casos com múltiplos problemas.
+- **Skeleton of Thought**: foi escolhido para manter um formato de saída consistente, com user story, critérios de aceitação e contexto quando necessário.
+- **ReAct silencioso**: foi escolhido para criar um fluxo interno de analisar, agir e revisar antes de responder, reduzindo omissões.
+
+### Exemplos práticos de aplicação
+
+- **Role Prompting**:
+  - o prompt define uma persona composta por `Product Manager Principal`, `Staff Software Architect` e `QA Lead`
+  - isso orienta a resposta para valor de negócio, clareza e testabilidade
+- **Chain of Thought silencioso**:
+  - o prompt manda identificar internamente persona, problema principal, fatos obrigatórios, números, logs e impactos antes da resposta
+- **Tree of Thought silencioso**:
+  - o prompt manda comparar internamente caminhos focados em valor, critérios testáveis e contexto técnico
+- **Skeleton of Thought**:
+  - o prompt fornece um `esqueleto curto` para bugs simples e um `esqueleto expandido` para bugs complexos
+- **ReAct silencioso**:
+  - o prompt organiza a execução interna em `Reason`, `Act`, `Review` e `Output`
+  - na etapa `Review`, o modelo verifica se todos os fatos relevantes foram cobertos
 
 ## Fluxo de Uso
 
@@ -133,12 +151,12 @@ python src/evaluate.py
 Para uso com Gemini free e controle de taxa:
 
 ```bash
-python run_with_rate_limit.py
+python src/run_with_rate_limit.py
 ```
 
 ## Avaliação com `run_with_rate_limit.py`
 
-O arquivo `run_with_rate_limit.py` foi criado como alternativa ao `src/evaluate.py`.
+O arquivo `src/run_with_rate_limit.py` foi criado como alternativa ao `src/evaluate.py`.
 
 - Ele foi derivado do `src/evaluate.py`
 - Foi usado para coletar as avaliações do projeto
@@ -151,6 +169,54 @@ Em termos práticos, o script:
 - aplica pausas entre chamadas ao modelo
 - faz retry em erros de cota (`429` e `RESOURCE_EXHAUSTED`)
 - evita interrupções frequentes em execuções com Gemini no plano free
+
+## Resultados Finais
+
+### Link público do LangSmith
+
+- Tracing do projeto está disponível no LangSmith Hub: 
+  - `https://smith.langchain.com/o/159a1f9a-0944-4cfc-8503-7ba431987f51/projects/p/e93e1bd7-09b2-49c0-920c-19442846af9e`
+- Dataset e experimento:
+  - `https://smith.langchain.com/o/159a1f9a-0944-4cfc-8503-7ba431987f51/datasets/725b4384-cad3-4e17-99e6-01d92039ad27?tab=1`
+
+### Screenshots das avaliações
+
+Abaixo estão os screenshots das execuções finais com as métricas mínimas de `0.9` atingidas, separados por ambiente de execução.
+
+#### Execução no Console
+
+- ![Console 1](evidências/console/Screenshot%202026-05-03%20at%2020.47.34.png)
+- ![Console 2](evidências/console/Screenshot%202026-05-03%20at%2020.55.31.png)
+- ![Console 3](evidências/console/Screenshot%202026-05-03%20at%2020.55.37.png)
+- ![Console 4](evidências/console/Screenshot%202026-05-03%20at%2020.55.59.png)
+- ![Console 5](evidências/console/Screenshot%202026-05-04%20at%2008.34.44.png)
+
+#### Execução no LangSmith
+
+- ![LangSmith 1](evidências/langsmith/Screenshot%202026-05-03%20at%2020.52.27.png)
+- ![LangSmith 2](evidências/langsmith/Screenshot%202026-05-03%20at%2020.53.06.png)
+- ![LangSmith 3](evidências/langsmith/Screenshot%202026-05-03%20at%2020.53.19.png)
+- ![LangSmith 4](evidências/langsmith/Screenshot%202026-05-03%20at%2020.53.27.png)
+- ![LangSmith 5](evidências/langsmith/Screenshot%202026-05-03%20at%2020.54.09.png)
+- ![LangSmith 6](evidências/langsmith/Screenshot%202026-05-03%20at%2020.54.41.png)
+- ![LangSmith 7](evidências/langsmith/Screenshot%202026-05-03%20at%2020.54.54.png)
+
+### Tabela comparativa: v1 vs v2
+
+| Aspecto | `bug_to_user_story_v1` | `bug_to_user_story_v2` |
+| --- | --- | --- |
+| Qualidade geral | Baixa | Otimizada iterativamente |
+| Estrutura da resposta | Genérica | BDD estruturado |
+| Persona | Fraca ou ausente | Especializada com `Role Prompting` |
+| Cobertura do bug | Parcial | Mais completa e orientada a critérios |
+| Clareza | Baixa | Alta |
+| Aderência à avaliação | Insuficiente | Melhorada ao longo das iterações |
+
+### Observação sobre os resultados
+
+- Durante o processo, as avaliações foram coletadas com `src/run_with_rate_limit.py`.
+- O motivo foi contornar limites de taxa do provider sem alterar `src/evaluate.py`.
+- Atualize esta seção com os números finais aprovados quando todas as métricas atingirem `>= 0.9`.
 
 ## Critério de Aprovação
 
@@ -168,12 +234,82 @@ O projeto é aprovado quando todas as métricas ficam em pelo menos `0.9`:
 - Depois de editar `prompts/bug_to_user_story_v2.yml`, é obrigatório executar o push novamente
 - O dataset de avaliação não deve ser alterado
 
+## Como Executar
+
+### Pré-requisitos e dependências
+
+- Python `3.9+`
+- Ambiente virtual Python
+- Dependências instaladas com `pip install -r requirements.txt`
+- Conta e credenciais do LangSmith
+- Chave de API do provider escolhido:
+  - OpenAI
+  - Google Gemini
+
+### Passo a passo
+
+#### 1. Criar ambiente virtual
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### 2. Configurar variáveis de ambiente
+
+- Copie `.env.example` para `.env`
+- Preencha:
+  - `LANGSMITH_API_KEY`
+  - `USERNAME_LANGSMITH_HUB`
+  - `LLM_PROVIDER`
+  - `OPENAI_API_KEY` ou `GOOGLE_API_KEY`
+  - `LLM_MODEL`
+  - `EVAL_MODEL`
+
+#### 3. Fazer pull do prompt inicial
+
+```bash
+python src/pull_prompts.py
+```
+
+#### 4. Editar o prompt otimizado
+
+- Arquivo:
+  - `prompts/bug_to_user_story_v2.yml`
+
+#### 5. Fazer push para o LangSmith Hub
+
+```bash
+python src/push_prompts.py
+```
+
+#### 6. Executar a avaliação
+
+Para avaliação padrão:
+
+```bash
+python src/evaluate.py
+```
+
+Para avaliação com controle de taxa:
+
+```bash
+python src/run_with_rate_limit.py
+```
+
+#### 7. Validar testes locais
+
+```bash
+pytest tests/test_prompts.py
+```
+
 ## Comandos Úteis
 
 ```bash
 python src/pull_prompts.py
 python src/push_prompts.py
 python src/evaluate.py
-python run_with_rate_limit.py
+python src/run_with_rate_limit.py
 pytest tests/test_prompts.py
 ```
